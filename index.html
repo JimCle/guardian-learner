@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guardian Learner</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./guardian-vocab.js"></script>
+    <script src="./truth-vocab.js"></script>
+    <script src="./ruiji-vocab.js"></script>
+    <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar" aria-label="Guardian controls">
+        <section class="brand" aria-label="Guardian">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <h1>Guardian Learner</h1>
+        </section>
+
+        <nav class="control-strip" aria-label="练习控制">
+          <button class="select-like" id="dictionaryButton" type="button">guardian</button>
+          <button class="select-like" id="chapterButton" type="button">第 1 章</button>
+          <button class="select-like" id="accentButton" type="button">英音</button>
+          <button class="icon-button active" id="soundButton" type="button" title="发音"><i data-lucide="volume-2"></i></button>
+          <button class="icon-button" id="prevButton" type="button" title="上一个单词"><i data-lucide="chevron-left"></i></button>
+          <button class="icon-button" id="nextButton" type="button" title="下一个单词"><i data-lucide="chevron-right"></i></button>
+          <button class="icon-button" id="shuffleButton" type="button" title="随机顺序"><i data-lucide="shuffle"></i></button>
+          <button class="icon-button" id="meaningButton" type="button" title="隐藏释义"><i data-lucide="eye-off"></i></button>
+          <button class="icon-button active" id="translateButton" type="button" title="显示中文"><i data-lucide="languages"></i></button>
+          <button class="icon-button" id="wordListButton" type="button" title="章节单词"><i data-lucide="book-open"></i></button>
+          <button class="icon-button" id="statsButton" type="button" title="练习统计"><i data-lucide="pie-chart"></i></button>
+          <button class="icon-button" id="themeButton" type="button" title="明暗主题"><i data-lucide="moon"></i></button>
+          <button class="icon-button" id="keyboardButton" type="button" title="键盘提示"><i data-lucide="keyboard"></i></button>
+          <button class="icon-button" id="settingsButton" type="button" title="设置"><i data-lucide="settings"></i></button>
+          <div class="run-menu">
+            <button class="start-button" id="startButton" type="button">Start</button>
+            <div class="run-popover" id="runPopover" aria-live="polite">
+              <div class="shortcut">暂停（Enter）</div>
+              <button type="button" id="pauseButton">Pause</button>
+              <button type="button" id="restartButton">Restart</button>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <button class="drawer-tab" id="drawerTab" type="button" title="章节和上传"><i data-lucide="list"></i></button>
+
+      <aside class="drawer" id="drawer" aria-label="章节管理">
+        <div class="drawer-head">
+          <div>
+            <strong>guardian</strong>
+            <span>Word 文档章节</span>
+          </div>
+          <button class="icon-button" id="closeDrawer" type="button" title="关闭"><i data-lucide="x"></i></button>
+        </div>
+
+        <label class="upload-card" for="docUpload">
+          <i data-lucide="file-up"></i>
+          <span>上传 Word 添加章节</span>
+          <small>支持 .docx；按所选内置词库提取文章单词</small>
+          <input id="docUpload" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple />
+        </label>
+
+        <label class="dictionary-picker" for="extractDictionarySelect">
+          <span>提取词库</span>
+          <select id="extractDictionarySelect"></select>
+        </label>
+
+        <section class="paste-panel" aria-label="粘贴文章提取章节">
+          <label for="pasteChapterTitle">章节标题</label>
+          <input id="pasteChapterTitle" type="text" placeholder="可选，默认按时间命名" />
+          <label for="pasteArticleText">粘贴文章</label>
+          <textarea id="pasteArticleText" rows="7" placeholder="把英文文章粘贴到这里"></textarea>
+          <button id="extractPastedArticle" type="button"><i data-lucide="file-plus-2"></i><span>提取为章节</span></button>
+        </section>
+
+        <div class="chapter-list" id="chapterList"></div>
+      </aside>
+
+      <section class="practice" aria-live="polite">
+        <div class="next-word" id="nextWord"></div>
+        <div class="word-wrap" id="wordWrap">
+          <div class="ghost-word" id="ghostWord">guardian</div>
+          <div class="word-line" id="wordLine"></div>
+          <button class="speak-word" id="speakWord" type="button" title="朗读单词"><i data-lucide="volume-2"></i></button>
+          <button class="delete-current-word" id="deleteCurrentWord" type="button" title="删除当前单词"><i data-lucide="trash-2"></i></button>
+        </div>
+        <div class="phonetic" id="phonetic"></div>
+        <div class="meaning" id="meaning">考研英一词库已载入</div>
+        <div class="typed-line" id="typedLine"></div>
+        <div class="prompt" id="prompt">按任意键开始</div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+      </section>
+
+      <section class="stats-panel" aria-label="统计">
+        <article>
+          <strong id="timeStat">00:00</strong>
+          <span>时间</span>
+        </article>
+        <article>
+          <strong id="inputStat">0</strong>
+          <span>输入数</span>
+        </article>
+        <article>
+          <strong id="wpmStat">0</strong>
+          <span>WPM</span>
+        </article>
+        <article>
+          <strong id="correctStat">0</strong>
+          <span>正确数</span>
+        </article>
+        <article>
+          <strong id="accuracyStat">0%</strong>
+          <span>正确率</span>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <span><i data-lucide="shield-check"></i></span>
+        <span>@ Guardian Learner</span>
+        <span>考研英一词库</span>
+        <span class="build">Build local</span>
+      </footer>
+
+      <dialog class="modal" id="wordModal">
+        <div class="modal-head">
+          <strong>章节单词</strong>
+          <button class="icon-button" id="closeWordModal" type="button" title="关闭"><i data-lucide="x"></i></button>
+        </div>
+        <div class="word-table" id="wordTable"></div>
+      </dialog>
+
+      <dialog class="modal small" id="settingsModal">
+        <div class="modal-head">
+          <strong>设置</strong>
+          <button class="icon-button" id="closeSettingsModal" type="button" title="关闭"><i data-lucide="x"></i></button>
+        </div>
+        <label class="setting-row">
+          <span>自动朗读</span>
+          <input id="autoSpeakToggle" type="checkbox" checked />
+        </label>
+        <label class="setting-row">
+          <span>完成单词后自动前进</span>
+          <input id="autoNextToggle" type="checkbox" checked />
+        </label>
+        <button class="danger" id="clearDataButton" type="button">清空本地上传章节</button>
+      </dialog>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
