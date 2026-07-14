@@ -1,6 +1,6 @@
 # Guardian Learner
 
-使用链接https:https://prismatic-biscochitos-6be7ef.netlify.app/
+使用链接:https://prismatic-biscochitos-6be7ef.netlify.app/
 
 Guardian Learner 是一个仿 Qwerty Learner 体验的本地/静态网页单词练习工具，面向考研英语文章精读和词汇复习。项目无需后端，直接部署为静态网站即可使用。
 
