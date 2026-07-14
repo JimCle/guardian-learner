@@ -14,6 +14,7 @@ const guardianWords = Array.isArray(window.GUARDIAN_VOCAB) && window.GUARDIAN_VO
 const guardianMeaningMap = createWordMap(guardianWords);
 const truthWords = hydrateMeanings(Array.isArray(window.TRUTH_VOCAB) ? window.TRUTH_VOCAB : [], guardianMeaningMap);
 const ruijiWords = hydrateMeanings(Array.isArray(window.RUIJI_VOCAB) ? window.RUIJI_VOCAB : [], guardianMeaningMap);
+const mergedWords = mergeDictionaries([guardianWords, truthWords, ruijiWords]);
 
 const builtinDictionaries = [
   {
@@ -33,6 +34,12 @@ const builtinDictionaries = [
     label: "2026 锐记核心词汇",
     source: "2026锐记考研英语核心词汇（带派生词）.csv",
     words: ruijiWords
+  },
+  {
+    id: "merged-complement-vocab",
+    label: "综合互补词库",
+    source: "guardian + 真题逐年闪背 + 锐记核心词汇",
+    words: mergedWords
   }
 ];
 
@@ -48,6 +55,22 @@ function createWordMap(words) {
     if (!map.has(key)) map.set(key, entry);
   }
   return map;
+}
+
+function mergeDictionaries(dictionaries) {
+  const map = new Map();
+  for (const words of dictionaries) {
+    for (const entry of words) {
+      const key = entry.word.toLowerCase();
+      if (map.has(key)) continue;
+      map.set(key, {
+        word: entry.word,
+        meaning: entry.meaning || "",
+        phonetic: entry.phonetic || ""
+      });
+    }
+  }
+  return Array.from(map.values());
 }
 
 function hydrateMeanings(words, fallbackMap) {
